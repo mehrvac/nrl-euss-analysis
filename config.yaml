@@ -1,0 +1,41 @@
+# Configuration for the ResStock 2024.2 (TMY3) cooling-load sensitivity analysis.
+# Values marked "confirm during recon" are validated/overwritten in step 0/1 of the pipeline.
+
+release:
+  bucket: oedi-data-lake
+  region: us-west-2
+  prefix: nrel-pds-building-stock/end-use-load-profiles-for-us-building-stock/2024/resstock_tmy3_release_2
+  https_base: https://oedi-data-lake.s3.amazonaws.com
+
+scope:
+  state: CA
+  upgrade: 1                       # HEAT STAR heat pump w/ elec backup retrofit
+  # Los Angeles County, CA -- FIPS 06037. Exact in.county GISJOIN confirmed during recon.
+  county_gisjoin: "G0600370"
+  county_name_contains: "Los Angeles"
+
+sampling:
+  n_buildings: 200
+  random_seed: 42
+
+target:
+  # Primary cooling-electricity column (confirm exact name during recon).
+  cooling_column: "out.electricity.cooling.energy_consumption"
+  include_fans_pumps: true
+  fans_pumps_column: "out.electricity.cooling_fans_pumps.energy_consumption"
+
+modeling:
+  temp_units: fahrenheit
+  # Modeling resolution: "daily" (mean temp vs total cooling per building-day) gives a far
+  # cleaner balance-point signal than "hourly", which is dominated by sub-daily noise.
+  resolution: daily
+  changepoint_grid_f: [50.0, 85.0, 0.5]   # balance-point search: start, stop, step (deg F)
+  test_size: 0.25
+
+paths:
+  raw_dir: data/raw
+  interim_dir: data/interim
+  processed_dir: data/processed
+  figures_dir: outputs/figures
+  models_dir: outputs/models
+  report_path: outputs/report.md
